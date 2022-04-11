@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         // error and bounds checking
         float sVal = (float)strobeDelay / MULTIPLIER;
         if (sVal <= 0.003f) sVal = 0.0f;
-        else if (sVal > 0.098f) sVal = 1.0f;
+        else if (sVal > 0.98f) sVal = 1.0f;
 
         strobeSlider.setValue(sVal);
     }
