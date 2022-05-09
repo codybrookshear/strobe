@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean strobeOn = false;
     private int curColor = Color.WHITE;
     private Button strobe;
-    private int strobeDelay = 0;
+    private float strobeDelay = 0.0f;
     private String STROBE_DELAY_KEY;
     SharedPreferences prefs ;
     static int MULTIPLIER = 2000; // 1.0 => 2,000 ms = 2 sec
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
             strobe.setBackgroundColor(curColor);
 
-            h.postDelayed(this, strobeDelay);
+            h.postDelayed(this, (long)(strobeDelay * MULTIPLIER));
         }
     };
 
@@ -52,12 +52,13 @@ public class MainActivity extends AppCompatActivity {
         Slider strobeSlider = (Slider) findViewById(R.id.strobeSlider);
         strobeSlider.addOnChangeListener((slider, value, fromUser) -> {
 
-            if (value == 0.0 || value == 1.0) {
+            strobeDelay = value;
+            if (strobeDelay == 0.0 || strobeDelay == 1.0) {
                 if (strobeOn) {
                     strobeOn = false;
                 }
 
-                if (value == 0.0) {
+                if (strobeDelay == 0.0) {
                     strobe.setBackgroundColor(Color.WHITE);
                 }
                 else {
@@ -65,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             else {
-                strobeDelay = (int) (value * MULTIPLIER);
                 if (!strobeOn) {
                     h.post(strobeUpdate);
                     strobeOn = true;
@@ -77,20 +77,14 @@ public class MainActivity extends AppCompatActivity {
         prefs = this.getSharedPreferences(
                 getApplicationContext().getPackageName(), Context.MODE_PRIVATE);
         STROBE_DELAY_KEY = getApplicationContext().getPackageName() + "strobe_delay";
-        strobeDelay = prefs.getInt(STROBE_DELAY_KEY, 0 );
-
-        // error and bounds checking
-        float sVal = (float)strobeDelay / MULTIPLIER;
-        if (sVal <= 0.003f) sVal = 0.0f;
-        else if (sVal > 0.98f) sVal = 1.0f;
-
-        strobeSlider.setValue(sVal);
+        strobeDelay = prefs.getFloat(STROBE_DELAY_KEY, 0.0f);
+        strobeSlider.setValue(strobeDelay);
     }
 
     @Override
     protected void onPause() {
 
-        prefs.edit().putInt(STROBE_DELAY_KEY, strobeDelay).apply();
+        prefs.edit().putFloat(STROBE_DELAY_KEY, strobeDelay).apply();
         super.onPause();
     }
 
